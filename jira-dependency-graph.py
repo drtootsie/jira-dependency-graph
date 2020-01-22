@@ -107,6 +107,14 @@ def build_graph_data(start_issue_key, jira, excludes, show_directions, direction
 
         linked_issue = link[direction + 'Issue']
         linked_issue_key = get_key(linked_issue)
+        if ('Epic' != linked_issue['fields']['issuetype']['name'] and linked_issue_key.split('-', 1)[0] != 'BACKLOG' and 'PPM Project' != linked_issue['fields']['issuetype']['name']):
+            log('Skipping ' + linked_issue_key + ' - Not Epic or BACKLOG')
+            log('Epic' != linked_issue['fields']['issuetype']['name'])
+            log(linked_issue_key.split('-', 1)[0] == 'Backlog')
+            log('PPM Project' != linked_issue['fields']['issuetype']['name'])
+            log(linked_issue['fields']['issuetype']['name'])
+            log(linked_issue_key.split('-', 1)[0])
+            return
         if linked_issue_key in issue_excludes:
             log('Skipping ' + linked_issue_key + ' - explicitly excluded')
             return
@@ -163,26 +171,26 @@ def build_graph_data(start_issue_key, jira, excludes, show_directions, direction
 
         graph.append(create_node_text(issue_key, fields, islink=False))
 
-        if not ignore_subtasks:
-            if fields['issuetype']['name'] == 'Epic' and not ignore_epic:
-                issues = jira.query('"Epic Link" = "%s"' % issue_key)
-                for subtask in issues:
-                    subtask_key = get_key(subtask)
-                    log(subtask_key + ' => references epic => ' + issue_key)
-                    node = '{}->{}[color=orange]'.format(
-                        create_node_text(issue_key, fields),
-                        create_node_text(subtask_key, subtask['fields']))
-                    graph.append(node)
-                    children.append(subtask_key)
-            if fields.has_key('subtasks') and not ignore_subtasks:
-                for subtask in fields['subtasks']:
-                    subtask_key = get_key(subtask)
-                    log(issue_key + ' => has subtask => ' + subtask_key)
-                    node = '{}->{}[color=blue][label="subtask"]'.format (
-                            create_node_text(issue_key, fields),
-                            create_node_text(subtask_key, subtask['fields']))
-                    graph.append(node)
-                    children.append(subtask_key)
+        #if not ignore_subtasks:
+            #if fields['issuetype']['name'] == 'Epic' and not ignore_epic:
+            #    issues = jira.query('"Epic Link" = "%s"' % issue_key)
+            #    for subtask in issues:
+            #        subtask_key = get_key(subtask)
+            #        log(subtask_key + ' => references epic => ' + issue_key)
+            #        node = '{}->{}[color=orange]'.format(
+            #            create_node_text(issue_key, fields),
+            #            create_node_text(subtask_key, subtask['fields']))
+            #        graph.append(node)
+            #        children.append(subtask_key)
+            #if fields.has_key('subtasks') and not ignore_subtasks:
+            #    for subtask in fields['subtasks']:
+            #        subtask_key = get_key(subtask)
+            #        log(issue_key + ' => has subtask => ' + subtask_key)
+            #        node = '{}->{}[color=blue][label="subtask"]'.format (
+            #                create_node_text(issue_key, fields),
+            #                create_node_text(subtask_key, subtask['fields']))
+            #        graph.append(node)
+            #        children.append(subtask_key)
 
         if fields.has_key('issuelinks'):
             for other_link in fields['issuelinks']:
@@ -231,7 +239,7 @@ def parse_args():
     parser.add_argument('-f', '--file', dest='image_file', default='issue_graph.png', help='Filename to write image to')
     parser.add_argument('-l', '--local', action='store_true', default=False, help='Render graphviz code to stdout')
     parser.add_argument('-e', '--ignore-epic', action='store_true', default=False, help='Don''t follow an Epic into it''s children issues')
-    parser.add_argument('-x', '--exclude-link', dest='excludes', default=[], action='append', help='Exclude link type(s)')
+    parser.add_argument('-x', '--exclude-link', dest='excludes', default=['is duplicated by', 'is cloned by', 'clones', 'duplicates'], action='append', help='Exclude link type(s)')
     parser.add_argument('-ic', '--ignore-closed', dest='closed', action='store_true', default=False, help='Ignore closed issues')
     parser.add_argument('-i', '--issue-include', dest='includes', default='', help='Include issue keys')
     parser.add_argument('-xi', '--issue-exclude', dest='issue_excludes', action='append', default=[], help='Exclude issue keys; can be repeated for multiple issues')

@@ -1,6 +1,7 @@
 jira-dependency-graph
 =====================
 
+python jira-dependency-graph.py --user= --password= --jira= --local BACKLOG-88 | dot -Tpng > issue.png
 Graph visualizer for dependencies between JIRA tickets. Takes into account subtasks and issue links.
 
 Uses JIRA rest API v2 for fetching information on issues.
