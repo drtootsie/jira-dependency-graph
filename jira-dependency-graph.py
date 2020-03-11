@@ -107,7 +107,7 @@ def build_graph_data(start_issue_key, jira, excludes, show_directions, direction
 
         linked_issue = link[direction + 'Issue']
         linked_issue_key = get_key(linked_issue)
-        if ('Epic' != linked_issue['fields']['issuetype']['name'] and linked_issue_key.split('-', 1)[0] != 'BACKLOG' and 'PPM Project' != linked_issue['fields']['issuetype']['name']):
+        if ('Epic' != linked_issue['fields']['issuetype']['name'] and linked_issue_key.split('-', 1)[0] != 'BACKLOG'):
             log('Skipping ' + linked_issue_key + ' - Not Epic or BACKLOG')
             log('Epic' != linked_issue['fields']['issuetype']['name'])
             log(linked_issue_key.split('-', 1)[0] == 'Backlog')
@@ -192,7 +192,7 @@ def build_graph_data(start_issue_key, jira, excludes, show_directions, direction
             #        graph.append(node)
             #        children.append(subtask_key)
 
-        if fields.has_key('issuelinks'):
+        if fields.has_key('issuelinks') and issue_key.split('-', 1)[0] == 'BACKLOG':
             for other_link in fields['issuelinks']:
                 result = process_link(fields, issue_key, other_link)
                 if result is not None:
